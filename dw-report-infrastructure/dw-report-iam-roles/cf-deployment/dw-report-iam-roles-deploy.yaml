@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template to create roles for dw-report-lambdas.
+
+#Parameters definition
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+  LambdaRole:
+    Description: The name of lambda role to use
+    Default: dw-report-lambda-role
+    Type: String
+  ApplicationTag:
+    Type: String
+    Default: "datawarehouse-reports-email"
+  AppFamilyTag:
+    Type: String
+    Default: "data-platform"
+    
+#Resources
+Resources:
+  DwReportRoleLambda:
+    Type: 'AWS::IAM::Role'
+    DependsOn: 
+      - DwReportPolicyLambda
+    Properties:
+      RoleName: !Sub '${Environment}-${LambdaRole}'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Ref DwReportPolicyLambda
+  
+  DwReportPolicyLambda:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: !Sub '${Environment}-dw-report-lambda-policy'
+      Description: >-
+        Policy that allows DW Report Lambda Functions to Log on CloudWatch and Get Objects from S3
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'ses:SendEmail'
+              - 'ses:SendRawEmail'
+              - 'ec2:CreateNetworkInterface'
+              - 'ec2:AttachNetworkInterface'
+              - 'ec2:DescribeNetworkInterfaces'
+              - 'ec2:DeleteNetworkInterface'
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*"
+          - Effect: Allow
+            Action:
+              - 's3:GetObject'
+              - 's3:GetObjectVersion'
+              - 's3:DeleteObject'
+              - 's3:DeleteObjectVersion'
+              - 's3:ListBucket'
+            Resource: 
+              - !Join 
+                - '-'
+                - - "arn:aws:s3:::k12"
+                  - !Ref Environment
+                  - "dw-report-email-data"
+              - !Join
+                - '-'
+                - - "arn:aws:s3:::k12"
+                  - !Ref Environment
+                  - "dw-report-email-data/*"

@@ -1,0 +1,8 @@
+{
+  "from": "DWTeam@dev.k12.com",
+  "to": ["ovillarraga@k12.com"],
+  "filename": "REPORT_TEST_01.zip",
+  "subject": "REPORT TESTS 01 in DEV",
+  "body_html": "<p>Dear Team:</p><p>The report was processed today in test env.</p><p>Cheers</p><p><b>K12 DW-Team.</b></p>",
+  "body_plain": "Dear Team:\r\nThe report was processed today in test env.\r\nCheers\r\nK12 DW-Team."
+}

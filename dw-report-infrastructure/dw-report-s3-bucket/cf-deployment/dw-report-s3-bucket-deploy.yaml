@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template to create the S3 bucket for dw-report-lambdas.
+
+#Parameters definition
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+  ApplicationTag:
+    Type: String
+    Default: "datawarehouse-reports-email"
+  AppFamilyTag:
+    Type: String
+    Default: "data-platform"
+
+Resources:
+  DwLambdasS3:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Join 
+        - '-'
+        - - "k12"
+          - !Ref Environment 
+          - dw-report-email

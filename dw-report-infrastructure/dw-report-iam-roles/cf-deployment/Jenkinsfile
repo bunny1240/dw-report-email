@@ -1,0 +1,28 @@
+#!groovy
+@Library('jenkins-shared-library') _
+//Author: jortiz@k12.com - jh.ortiz@globant.com
+
+// Ask the password value allowed to deploy on prod environment
+properties([
+  parameters([
+    string(name: 's3BucketRollbackTemplate', defaultValue: '', description: 'The s3 rollback bucket template'),    
+    password(name: 'tokenProdEnvParam', defaultValue: '', description: 'The token allowed to deploy on prod environment'),
+    choice(name: 'action', choices: ['delta-deployment', 'entire-deployment'], description: 'Select the action to do:')
+   ])
+])
+
+// Passes values through intermediary 
+def _action = params.action
+def _tokenProdEnv = params.tokenProdEnvParam
+def _s3BucketRollbackTemplate = params.s3BucketRollbackTemplate
+
+// Sending the parameters to uniTestPipeline (Shared libraries /vars/unitTestPipeline.groovy)
+pipeline_cf_deploy {
+    repoSlug                 = 'dw-report-email'                                  //Put the repo slug of the project, not the url only the name of the repository.
+    project                  = 'dw-report-infrastructure/dw-report-iam-roles/'   //Put the project, if you don't have projects on the repository please use the value ''.
+    deployUsing              = 'cf'                                       //Put the platform to use to deploy.
+    dbTool                   = ''                                         //Put liquibase or sql if you need apply database changes else put ''.
+    tokenProdEnv             = _tokenProdEnv                              //Sending the token allowed to deploy on prod
+    s3BucketRollbackTemplate = _s3BucketRollbackTemplate                  //Put the template rollback name
+    action                   = _action                                    //Action to do..  
+}

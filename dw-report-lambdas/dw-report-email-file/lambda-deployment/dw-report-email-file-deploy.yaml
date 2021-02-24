@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: DW Lambda Function for sending report file by Email.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+  ApplicationTag:
+    Type: String
+    Default: "datawarehouse-reports-email"
+  AppFamilyTag:
+    Type: String
+    Default: "data-platform"
+  FunctionName:
+    Type: String
+    Default: dw-report-email-file
+  LambdaRole:
+    Type: String
+    Default: dw-report-lambda-role
+
+Resources:
+  DwReportEmailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../dw-report-email-file/src
+      Handler: app.app.lambda_handler
+      Runtime: python3.7
+      MemorySize: 512
+      Timeout: 30  
+      FunctionName: !Sub '${Environment}-${FunctionName}'
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${Environment}-${LambdaRole}'
+  DwLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${DwReportEmailFunction}"
+      RetentionInDays: 7
+  DwAsyncConfiguration:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties: 
+      FunctionName: !Sub '${Environment}-${FunctionName}'
+      MaximumEventAgeInSeconds: 60
+      MaximumRetryAttempts: 0
+      Qualifier: '$LATEST'

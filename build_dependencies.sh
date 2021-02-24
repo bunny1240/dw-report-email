@@ -1,0 +1,1 @@
+echo "running build_dependencies.sh - script located in the root of the workspace"
